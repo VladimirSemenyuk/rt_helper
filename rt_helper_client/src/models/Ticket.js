@@ -111,6 +111,8 @@ export default class Ticket {
     }
 
     __processHistory(history, upToDate = new Date()) {
+        this.history = [];
+        
         const statusesTimes = {};
         let lastTimeSeen = new Date(history.length ? history[0].Created : undefined);
 
