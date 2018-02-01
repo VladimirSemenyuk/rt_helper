@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Tag, Tooltip, Progress, Select, Button, Row, Col, Checkbox, DatePicker, Spin } from 'antd';
+import { Progress } from 'antd';
 
 export default function loaderComponent(loadingStatus) {
     let progress;

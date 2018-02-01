@@ -41,22 +41,19 @@ export default class Ticket {
     get estimatedMinutes() {
         return this.history.reduce((r, e) => {
             if (e.Field === 'TimeEstimated') {
-                return parseInt(e.NewValue.replace(' minutes', ''), 10)
+                return e.NewValue ? parseInt(e.NewValue.replace(' minutes', ''), 10) : 0
             }
             return r;
         }, parseInt(this.TimeEstimated.replace(' minutes', ''), 10));
-        // return parseInt(this.TimeEstimated.replace(' minutes', ''), 10);
     }
 
     get workedMinutes() {
         return this.history.reduce((r, e) => {
             if (e.Field === 'TimeWorked') {
-                return parseInt(e.NewValue.replace(' minutes', ''), 10);// - parseInt(e.OldValue.replace(' minutes', ''), 10)
+                return parseInt((e.NewValue || '0').replace(' minutes', ''), 10);
             }
             return r;
         }, 0);
-        //return this.history.reduce((r, e) => r + (e.minutesWorked || 0), 0);
-        // return parseInt(this.TimeWorked.replace(' minutes', ''), 10);
     }
 
     get leftMinutes() {
@@ -160,10 +157,6 @@ export default class Ticket {
         for (let i = 0; i < this.history.length; i++) {
             const e = this.history[i];
 
-            // if (e.createdAt > dateStart && !trimmedHistory.length && i > 0) {
-            //     trimmedHistory.unshift(this.history[i - 1]);
-            // }   
-
             if (e.createdAt > dateStart && e.createdAt < dateEnd) {
                 trimmedHistory.push(e);
             }
@@ -180,13 +173,7 @@ export default class Ticket {
             Status: status
         });
 
-        // debugger;
-
         ticket.__processHistory(trimmedHistory, dateEnd);
-
-        // debugger;
-
-        // var a = 1;
 
         return ticket;
     }

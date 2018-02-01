@@ -30,18 +30,13 @@ export default class TicketsTableComponent extends Component {
         this.state = {
             tickets: previouslyLoadedTickets,
             owners: state.owners,
-            // allOwners: null,
-            // sprints: null,
-            // allSprints: null,
             queues: state.queues,
-            // allQueues: null,
             loading: false,
             loadingStatus: '',
             allStatuses: state.allStatuses,
             fromDate: state.fromDate
         };
 
-        this.__onTableChange = this.__onTableChange.bind(this);
         this.__load = this.__load.bind(this);
         this.__changeAllStatuses = this.__changeAllStatuses.bind(this);
         this.__changeOwners = this.__changeOwners.bind(this);
@@ -53,8 +48,8 @@ export default class TicketsTableComponent extends Component {
     render() {
         let content = '';
 
-        if (this.state.loading && this.state.loadingStatus) {
-            content = loaderComponent(this.state.loadingStatus)
+        if (this.state.loading) {
+            content = loaderComponent(this.state.loadingStatus || {})
         } else {
             let tickets = this.state.tickets;
             let statuses = tickets.map(t => t.Status).filter((value, index, self) => self.indexOf(value) === index);
@@ -234,12 +229,11 @@ export default class TicketsTableComponent extends Component {
                     title: 'Troubles',
                     dataIndex: 'troubles',
                     filters: troublesFilters,
-                    onFilter: (value, ticket) => ticket.troubles.indexOf(value) !== -1,//(!!ticket.troubles.length).toString() === value,
+                    onFilter: (value, ticket) => ticket.troubles.indexOf(value) !== -1,
                     render: troublesComponent
                 }
             ]} dataSource={tickets} onChange={this.__onTableChange} />
         }
-
 
         return (
             <div>
@@ -290,7 +284,6 @@ export default class TicketsTableComponent extends Component {
     }
 
     __load() {
-
         this.setState({
             loading: true,
             loadingStatus: this.props.dashboard.loadingStatus,
@@ -304,10 +297,6 @@ export default class TicketsTableComponent extends Component {
         }).then((tickets) => {
             this.setState({
                 tickets: tickets,
-                // allOwners: dash.allOwners,
-                // allSprints: dash.allSprints,
-                // allQueues: dash.allQueues,
-                // section: this.state.section,
                 loading: false,
                 loadingStatus: this.props.dashboard.loadingStatus
             });
@@ -370,12 +359,6 @@ export default class TicketsTableComponent extends Component {
             loadingStatus: status
         });
     }
-
-    __onTableChange() {
-        console.log(arguments);
-    }
-
-    
 }
 
 function timeRender(ticket, toRenderFn) {

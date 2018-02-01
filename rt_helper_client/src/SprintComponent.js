@@ -1,21 +1,15 @@
 import React, { Component } from 'react';
 import { Table, Button, Select, InputNumber, Row, Col, } from 'antd';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import moment from 'moment';
 import TicketIdComponent from './TicketIdComponent';
 import statusComponent from './statusComponent';
 import troubleIconComponent from './troubleIconComponent';
 import Sprint from './models/Sprint';
-import { getWeek } from './utils';
 import CONFIG from './config';
 import loaderComponent from './loaderComponent';
 import state from './state';
 import colors from './colors';
-
-const tableStyle = {
-    verticalAlign: 'top',
-    padding: '10px 10px 0'
-};
 
 function getSprintId(mdt) {
     return `${mdt.year()}-w${mdt.week()}`;
@@ -31,7 +25,7 @@ for (let i = 0; i < 3; i++) {
     sprints.push(getSprintId(moment().add((1 + i), 'w')));
 }
 
-let previouslyLoadedTickets = []
+let previouslyLoadedTickets = [];
 
 export default class SprintComponent extends Component {
     constructor(...args) {
@@ -57,12 +51,10 @@ export default class SprintComponent extends Component {
             return this.state.queues.indexOf(t.Queue) !== -1;
         });
 
-        
         if (this.state.loading && this.state.loadingStatus) {
             content = loaderComponent(this.state.loadingStatus)
         } else if (tickets.length) {
             const sprint = new Sprint(this.state.currentSprintId, tickets);
-            
             const ticketsByStatuses = {};
             const ticketsByTroubles = {};
             const trimmedTicketsByTroubles = {};
@@ -78,25 +70,23 @@ export default class SprintComponent extends Component {
     
             const weekNum = parseInt(this.state.currentSprintId.split('-w')[1], 10);
             const date = moment().day("Monday").week(weekNum);
-    
-            for (const o of tickets.map(t => {
-                    t.troubles.forEach((tr) => {
-                        ticketsByTroubles[tr] = ticketsByTroubles[tr] || [];
-                        ticketsByTroubles[tr].push(t); 
-                    });
-                    
-                    return {
-                        original: t,
-                        trimmed: t.getTicketWithTrimmedHistory(date.startOf('isoWeek').toDate(), date.endOf('isoWeek').toDate())
-                        //trimmed: t.getTicketWithTrimmedHistory(date.startOf('isoWeek').toDate(), date.endOf('isoWeek').toDate())
-                    }
-                })) {
+
+            tickets.map(t => {
+                t.troubles.forEach((tr) => {
+                    ticketsByTroubles[tr] = ticketsByTroubles[tr] || [];
+                    ticketsByTroubles[tr].push(t); 
+                });
                 
-                    o.trimmed.troubles.forEach((tr) => {
-                        trimmedTicketsByTroubles[tr] = trimmedTicketsByTroubles[tr] || [];
-                        trimmedTicketsByTroubles[tr].push(o.trimmed); 
-                    });
-            }
+                return {
+                    original: t,
+                    trimmed: t.getTicketWithTrimmedHistory(date.startOf('isoWeek').toDate(), date.endOf('isoWeek').toDate())
+                }
+            }).forEach((o) => {
+                o.trimmed.troubles.forEach((tr) => {
+                    trimmedTicketsByTroubles[tr] = trimmedTicketsByTroubles[tr] || [];
+                    trimmedTicketsByTroubles[tr].push(o.trimmed); 
+                });
+            });
     
             const rs = (ticket) => statusComponent(ticket.Status);
             const report = sprint.report;
@@ -167,10 +157,6 @@ export default class SprintComponent extends Component {
     
                 return res;
             })];
-
-            // const totalWorkedMinutes = tickets.reduce((acc, t) => {
-            //     return acc += t.estimatedMinutes
-            // }, 0);
     
             const ticketsDone = [];
     
@@ -182,7 +168,6 @@ export default class SprintComponent extends Component {
     
             let ticketsDonePercents = tickets ? Math.round(ticketsDone.length / tickets.length * 100 ) : 0;
 
-            //console.log(data);
             const workingWeek = sprint.getWorkingWeek().map(m => m.format('MM.DD'));
             const chartData = workingWeek.map((d, index) => {
                 return {
@@ -203,92 +188,97 @@ export default class SprintComponent extends Component {
                 };
             });
 
-
             content = <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <td style={{...tableStyle, width: '50%'}}><h3>Sprint Overview</h3></td>
-                            {/* <td style={tableStyle}><h3>Troubles Occured in Sprint</h3></td> */}
-                            <td style={tableStyle}><h3>Troubles Occured</h3></td>
-                            <td style={tableStyle}><h3>Burndown Chart</h3></td>
-                        </tr>
-                    </thead>
+                <Row>
+                    <Col span={12}>
+                        <h3>Sprint Overview</h3>
+                    </Col>
 
-                    <tbody>
-                        <tr>
-                            <td style={tableStyle}>
-                                <div>
-                                    <b>Tickets total:</b> {sprint.__tickets.length}&nbsp;&nbsp;&nbsp;
-                                    {
-                                        sprint.__tickets.map(t => <span key={'sprint-ticket-all-' + t.id}><TicketIdComponent ticket={t} />, </span>)
-                                    }
-                                </div>
-                                <div>
-                                    <b>Tickets by statuses:</b>
-                                    {
-                                        Object.keys(ticketsByStatuses).map(status => {
-                                            return (
-                                                <div key={status}>
-                                                    {statusComponent(status)} {ticketsByStatuses[status].length}&nbsp;&nbsp;&nbsp;
-                                                    {
-                                                        ticketsByStatuses[status].map(t => <span key={'sprint-ticket-by-status-' + t.id}><TicketIdComponent ticket={t} />, </span>)
-                                                    }
-                                                </div>
-                                            )
-                                        })
-                                    }
-                                </div>
-                                <div>
-                                    <b>Completed:</b> {ticketsDonePercents}%
-                                </div>
-                            </td>
-                            {/* <td style={tableStyle}>
-                                {
-                                    Object.keys(trimmedTicketsByTroubles).map(trouble => {
-                                        return (
-                                            <div key={trouble}>
-                                                {troubleIconComponent(trouble)} {trimmedTicketsByTroubles[trouble].length}&nbsp;&nbsp;&nbsp;
-                                                {
-                                                    trimmedTicketsByTroubles[trouble].map(t => <span key={'sprint-ticket-by-trouble-' + t.id}><TicketIdComponent ticket={t} />, </span>)
-                                                }
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </td> */}
-                            <td style={tableStyle}>
-                                {
-                                    Object.keys(ticketsByTroubles).map(trouble => {
-                                        return (
-                                            <div key={trouble}>
-                                                {troubleIconComponent(trouble)} {ticketsByTroubles[trouble].length}&nbsp;&nbsp;&nbsp;
-                                                {
-                                                    ticketsByTroubles[trouble].map(t => <span key={'sprint-ticket-by-trouble-' + t.id}><TicketIdComponent ticket={t} />, </span>)
-                                                }
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </td>
-                            <td style={tableStyle}>
-                            <LineChart width={600} height={300} data={chartData}>
+                    <Col span={4}>
+                        <h3>Troubles Occured</h3>
+                        {/* <h3>Troubles Occured in Sprint</h3> */}
+                    </Col>
+
+                    <Col span={8}>
+                        <h3>Burndown Chart</h3>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col span={12}>
+                        <div>
+                        <b>Tickets total:</b> {sprint.__tickets.length}&nbsp;&nbsp;&nbsp;
+                            {
+                                sprint.__tickets.map(t => <span key={'sprint-ticket-all-' + t.id}><TicketIdComponent ticket={t} />, </span>)
+                            }
+                        </div>
+                        <div>
+                            <b>Tickets by statuses:</b>
+                            {
+                                Object.keys(ticketsByStatuses).map(status => {
+                                    return (
+                                        <div key={status}>
+                                            {statusComponent(status)} {ticketsByStatuses[status].length}&nbsp;&nbsp;&nbsp;
+                                            {
+                                                ticketsByStatuses[status].map(t => <span key={'sprint-ticket-by-status-' + t.id}><TicketIdComponent ticket={t} />, </span>)
+                                            }
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                        <div>
+                            <b>Completed:</b> {ticketsDonePercents}%
+                        </div>
+                    </Col>
+
+                    <Col span={4}>
+                        {
+                            Object.keys(ticketsByTroubles).map(trouble => {
+                                return (
+                                    <div key={trouble}>
+                                        {troubleIconComponent(trouble)} {ticketsByTroubles[trouble].length}&nbsp;&nbsp;&nbsp;
+                                        {
+                                            ticketsByTroubles[trouble].map(t => <span key={'sprint-ticket-by-trouble-' + t.id}><TicketIdComponent ticket={t} />, </span>)
+                                        }
+                                    </div>
+                                )
+                            })
+                        }
+
+                        {/* <td style={tableStyle}>
+                            {
+                                Object.keys(trimmedTicketsByTroubles).map(trouble => {
+                                    return (
+                                        <div key={trouble}>
+                                            {troubleIconComponent(trouble)} {trimmedTicketsByTroubles[trouble].length}&nbsp;&nbsp;&nbsp;
+                                            {
+                                                trimmedTicketsByTroubles[trouble].map(t => <span key={'sprint-ticket-by-trouble-' + t.id}><TicketIdComponent ticket={t} />, </span>)
+                                            }
+                                        </div>
+                                    )
+                                })
+                            }
+                        </td> */}
+                    </Col>
+
+                    <Col span={8}>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
                                 <CartesianGrid stroke="#ccc" />
                                 <YAxis />
                                 <XAxis dataKey="name" />
                                 <Line type="linear" name="Minutes left" dataKey="left" isAnimationActive={false} strokeWidth={2}  stroke={colors.red} />
                                 <Tooltip/>
                             </LineChart>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        </ResponsiveContainer>
+                    </Col>
+
+                </Row>
+  
                 <Table columns={columns} dataSource={data} pagination={false}/>
             </div>
-        } else {
-
         }
-
 
         return (
             <div>
@@ -354,14 +344,12 @@ export default class SprintComponent extends Component {
 
     __onChangeLoadingStatus(status) {
         this.setState({
-            ...this.state,
             loadingStatus: status
         });
     }
 
     __selectSprint(id) {
         this.setState({
-            // ...this.state,
             currentSprintId: id
         });
     }
@@ -372,7 +360,6 @@ export default class SprintComponent extends Component {
         state.sync();
 
         this.setState({
-            ...this.state,
             queues: state.queues
         })
     };

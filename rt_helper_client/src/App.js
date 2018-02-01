@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
-import CONFIG from './config';
 import TicketsTableComponent from './TicketsTableComponent';
 import SprintComponent from './SprintComponent';
 import { Layout, Menu, Row, Col,} from 'antd';
 import Dashboard from './models/Dashboard';
-import Grid from 'antd/lib/card/Grid';
 
 const { Header, Content, Footer, Sider } = Layout;
 

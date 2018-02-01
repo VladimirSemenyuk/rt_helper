@@ -1,54 +1,9 @@
-import { parseApiResponce, fetch } from '../utils';
-import CONFIG from '../config';
+import { fetch } from '../utils';
 import Ticket from './Ticket';
-import { getWeek } from '../utils';
+import { debug } from 'util';
 
 export default class Dashboard {
-    get allQueues() {
-        const queues = new Set();
-
-        this.allTickets.forEach(t => {
-            queues.add(t.Queue);
-        });
-
-        return [...queues];
-    }
-
-    get allOwners() {
-        const owners = new Set();
-
-        this.allTickets.forEach(t => {
-            owners.add(t.Owner);
-        });
-
-        const res = [...owners];
-
-        res.sort((o1, o2) => {
-            if (o1 === 'Nobody') {
-                return -1
-            } else if (o2 === 'Nobody') {
-                return 1
-            }
-
-            if (o1 < o2) {
-                return -1;
-            } else if (o1 > o2) {
-                return 1;
-            }
-
-            return 0;
-        });
-
-        return res.filter((o) => {
-            return o;
-        });
-    }
-
     constructor() {
-        //this.__queues = args.queues || [],//CONFIG.QUEUES.map(q => new Queue(q));
-        //this.__owners = args.owners || [],//CONFIG.QUEUES.map(q => new Queue(q));
-        //this.__from = args.from,
-        //this.__all = args.all,
         this.__tickets = {};
         this.loadingStatus = {};
         this.__onChangeLoadingStatusCallbacks = new Set();
@@ -62,14 +17,11 @@ export default class Dashboard {
         this.__onChangeLoadingStatusCallbacks.delete(fn);
     }
 
-    __setLoadingStatus(status) {
-        this.loadingStatus = status;
-
-        this.__onChangeLoadingStatusCallbacks.forEach(cb => cb(status));
-    }
-
-
     async fetch(args) {
+        this.__setLoadingStatus({
+            text: 'Fetching Queues...'
+        });
+
         const {queues, owners, sprints, from, allStatuses} = {
             queues: [],
             owners: [],
@@ -78,15 +30,34 @@ export default class Dashboard {
             allStatuses: false,
             ...args
         };
-        this.__setLoadingStatus({
-            text: 'Fetching Queues...'
-        });
-        const queuesWithTickets = await Promise.all(queues.map(q => fetch(`queue/${q}`)));
+        const queuesWithTickets = await this.__fetchQueuesTickets(queues, allStatuses, from);
 
         this.__setLoadingStatus({
             text: 'Fetching Users...'
         });
-        const users = await Promise.all(owners.map((t) => {
+
+        const usersTickets = await this.__fetchUsersTickets(owners, allStatuses, from);
+        const ticketsInSprints = await Promise.all(sprints.map(s => fetch(`sprint/${s}/tickets`)));
+
+        const ticketsTofetchIds = new Set([
+            ...queuesWithTickets.reduce((arr, q) => arr.concat(q), []).map(t => t.id), 
+            ...usersTickets.reduce((arr, i) => arr.concat(Object.keys(i)), []),
+            ...ticketsInSprints.reduce((arr, i) => arr.concat(Object.keys(i)), [])
+        ]);
+
+        ticketsTofetchIds.forEach((t) => {
+            this.__tickets[t] = this.__tickets[t] || new Ticket(t);
+        });
+
+        await this.__fetchTickets([...ticketsTofetchIds]);
+
+        this.__setLoadingStatus('Loaded');
+
+        return [...ticketsTofetchIds].map(t => this.__tickets[t])
+    }
+
+    async __fetchUsersTickets(users, allStatuses, from) {
+        return Promise.all(users.map((t) => {
             let url = `user/${t}/tickets?`;
 
             if (allStatuses) {
@@ -99,39 +70,34 @@ export default class Dashboard {
 
             return fetch(url);
         }));
+    }
 
-        const ticketsInSprints = await Promise.all(sprints.map(s => fetch(`sprint/${s}/tickets`)));
+    async __fetchQueuesTickets(queues, allStatuses, from) {
+        return Promise.all(queues.map((q) => {
+            let url = `queue/${q}?`;
 
-        const ticketsTofetchIds = new Set();
+            if (allStatuses) {
+                url += 'all=true&';
+            }
+
+            if (from) {
+                url += `from=${from}&`;
+            }
+
+            return fetch(url);
+        }));
+    }
+
+    async __fetchTickets(ids) {
         let ticketsFetchedCounter = 0;
-
-        for (var q of queuesWithTickets) {
-            q.forEach((t) => {
-                ticketsTofetchIds.add(t.id);
-            });
-        }
-
-        for (var u of users) {
-            Object.keys(u).forEach((t) => ticketsTofetchIds.add(t));
-        }
-
-        for (var s of ticketsInSprints) {
-            Object.keys(s).forEach((t) => ticketsTofetchIds.add(t));
-        }
 
         this.__setLoadingStatus({
             text: `Fetching Tickets...`,
             done: ticketsFetchedCounter,
-            total: ticketsTofetchIds.size
+            total: ids.length
         });
 
-        ticketsTofetchIds.forEach((t) => {
-            this.__tickets[t] = this.__tickets[t] || new Ticket(t);
-        });
-
-        this.allTickets = Object.values(this.__tickets);
-
-        await Promise.all([...ticketsTofetchIds].map(t => {
+        return Promise.all(ids.map(t => {
             const p = this.__tickets[t].fetch();
 
             p.then(() => {
@@ -139,35 +105,17 @@ export default class Dashboard {
                 this.__setLoadingStatus({
                     text: `Fetching Tickets...`,
                     done: ticketsFetchedCounter,
-                    total: ticketsTofetchIds.size
+                    total: ids.length
                 });
             });
 
             return p;
-        }));
+        }))
+    }
 
-        this.__setLoadingStatus('Loaded');
+    __setLoadingStatus(status) {
+        this.loadingStatus = status;
 
-        // const sprints = new Set();
-
-        // this.allTickets.forEach(t => {
-        //     sprints.add(t.sprint);
-        // });
-
-        // const d = new Date();
-        // const year = (d).getFullYear();
-        // const currentWeek = getWeek(d);
-
-        // for (let i = 0; i < 4; i++) {
-        //     sprints.add(`${year}-w${currentWeek + i}`);
-        // }
-
-        //const sp = [...sprints];
-
-        //sp.sort();
-
-        //this.allSprints = sp;
-
-        return [...ticketsTofetchIds].map(t => this.__tickets[t])
+        this.__onChangeLoadingStatusCallbacks.forEach(cb => cb(status));
     }
 }
