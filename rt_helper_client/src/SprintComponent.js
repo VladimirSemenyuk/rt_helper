@@ -11,6 +11,8 @@ import loaderComponent from './loaderComponent';
 import state from './state';
 import colors from './colors';
 
+const DONE_STATUSES = ['merged', 'deployed', 'staging', 'resolved', 'rejected', 'accepted'];
+
 function getSprintId(mdt) {
     return `${mdt.year()}-w${mdt.week()}`;
 }
@@ -161,7 +163,7 @@ export default class SprintComponent extends Component {
             const ticketsDone = [];
     
             for (const t of tickets) {
-                if (['merged', 'deployed', 'staging', 'resolved', 'rejected'].indexOf(t.Status) !== -1) {
+                if (DONE_STATUSES.indexOf(t.Status) !== -1) {
                     ticketsDone.push(t);
                 }
             }
