@@ -7,6 +7,7 @@ import Dashboard from './models/Dashboard';
 import Ticket, {TROUBLES} from './models/Ticket';
 import TicketIdComponent from './TicketIdComponent';
 import statusComponent from './statusComponent';
+import timeComponent from './timeComponent';
 import loeComponent from './loeComponent';
 import troublesComponent from './troublesComponent';
 import lifetimeComponent from './lifetimeComponent';
@@ -201,7 +202,7 @@ export default class TicketsTableComponent extends Component {
                     title: 'loe',
                     dataIndex: 'estimatedMinutes',
                     render: (left, ticket) => {
-                        return timeRender(ticket, ticket => <span>{loeComponent(ticket.workedMinutes)} / {loeComponent(ticket.estimatedMinutes)}</span>);
+                        return timeComponent(ticket, ticket => <span>{loeComponent(ticket.workedMinutes)} / {loeComponent(ticket.estimatedMinutes)}</span>);
                     },
                     sorter: (t1, t2) => {
                         if (t1.workedMinutes < t2.workedMinutes)
@@ -215,7 +216,7 @@ export default class TicketsTableComponent extends Component {
                     title: 'Time',
                     dataIndex: 'leftMinutes',
                     render: (left, ticket) => {
-                        return timeRender(ticket, ticket => <span>{ticket.workedMinutes} / {ticket.estimatedMinutes}</span>);
+                        return timeComponent(ticket, ticket => <span>{ticket.workedMinutes} / {ticket.estimatedMinutes}</span>);
                     },
                     sorter: (t1, t2) => {
                         if (t1.workedMinutes < t2.workedMinutes)
@@ -361,19 +362,3 @@ export default class TicketsTableComponent extends Component {
     }
 }
 
-function timeRender(ticket, toRenderFn) {
-    let color = COLORS.blue;
-    const d = ticket.workedMinutes / ticket.estimatedMinutes
-
-    if (d > 1.25) {
-        color = COLORS.red;
-    } else if (d > 1) {
-        color = COLORS.black;
-    }
-
-    return (
-        <span style={{color: color}}>
-            {toRenderFn(ticket)}
-        </span>
-    );
-} 

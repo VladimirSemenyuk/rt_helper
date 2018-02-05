@@ -7,7 +7,9 @@ import statusComponent from './statusComponent';
 import troubleIconComponent from './troubleIconComponent';
 import Sprint from './models/Sprint';
 import CONFIG from './config';
+import timeComponent from './timeComponent';
 import loaderComponent from './loaderComponent';
+import loeComponent from './loeComponent';
 import state from './state';
 import colors from './colors';
 
@@ -45,6 +47,10 @@ export default class SprintComponent extends Component {
         this.__onChangeLoadingStatus = this.__onChangeLoadingStatus.bind(this);
         this.__changeQueues = this.__changeQueues.bind(this);
         this.__load = this.__load.bind(this);
+    }
+
+    componentDidMount() {
+        this.__load();
     }
 
     render() {
@@ -112,13 +118,6 @@ export default class SprintComponent extends Component {
                         if (t1.Subject > t2.Subject)
                             return 1
                         return 0
-                    },
-                    sorter: (t1, t2) => {
-                        if (t1.Status < t2.Status)
-                            return -1
-                        if (t1.Status > t2.Status)
-                            return 1
-                        return 0
                     }
                 },
                 {
@@ -128,6 +127,20 @@ export default class SprintComponent extends Component {
                         if (t1.Owner < t2.Owner)
                             return -1
                         if (t1.Owner > t2.Owner)
+                            return 1
+                        return 0
+                    }
+                },
+                {
+                    title: 'loe',
+                    dataIndex: 'estimatedMinutes',
+                    render: (left, o) => {
+                        return timeComponent(o.original, ticket => <span>{loeComponent(ticket.workedMinutes)} / {loeComponent(ticket.estimatedMinutes)}</span>);
+                    },
+                    sorter: (t1, t2) => {
+                        if (t1.workedMinutes < t2.workedMinutes)
+                            return -1
+                        if (t1.workedMinutes > t2.workedMinutes)
                             return 1
                         return 0
                     }
@@ -306,13 +319,13 @@ export default class SprintComponent extends Component {
                         </Select>
                     </Col>
                     <Col span={2} style={{textAlign: 'right'}}>
-                        {
+                        {/* {
                             this.state.loading && <Button onClick={this.__load} disabled={this.state.loading} type="primary">Load</Button>
                         }
 
                         {
                             !this.state.loading && <Button onClick={this.__load} type="primary">Load</Button>
-                        }
+                        } */}
                     </Col>
                 </Row>
 
@@ -353,7 +366,7 @@ export default class SprintComponent extends Component {
     __selectSprint(id) {
         this.setState({
             currentSprintId: id
-        });
+        }, this.__load);
     }
 
     __changeQueues(values) {

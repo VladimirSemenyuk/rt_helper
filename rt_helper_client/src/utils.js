@@ -74,3 +74,4 @@ export function getWeek(date) {
     // and the Thursday in the target week (604800000 = 7 * 24 * 3600 * 1000)
     return 1 + Math.ceil((n1stThursday - date) / 604800000);
 }
+
