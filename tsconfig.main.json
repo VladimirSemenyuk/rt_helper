@@ -1,0 +1,17 @@
+{
+    "include": [
+        "./src/main.ts"
+    ],
+    "compilerOptions": {
+        "target": "es6",                          
+        "module": "commonjs",                     
+        "jsx": "react",                     
+        "outDir": "./compiled",              
+        "removeComments": true,                
+        "strict": true,                        
+        "experimentalDecorators": true,        
+        "emitDecoratorMetadata": true,         
+        "listFiles": true,
+        "allowSyntheticDefaultImports": true
+    }
+}
