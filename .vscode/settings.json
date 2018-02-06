@@ -9,5 +9,7 @@
         "**/.DS_Store": true,
         "**/node_modules": true,
         "build": true,
+        "compiled": true,
+        "dist": true,
     }
 }

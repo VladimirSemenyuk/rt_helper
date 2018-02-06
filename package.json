@@ -2,17 +2,18 @@
     "name": "rt_helper",
     "version": "1.0.0",
     "description": "",
-    "main": "build/Release/main.js",
+    "main": "compiled/main.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "npm run build && ./node_modules/.bin/electron .",
-        "build": "rm -rf ./build && ./node_modules/.bin/tsc -p . && ./node_modules/.bin/tsc -p ./tsconfig.main.json && cp ./src/index.html build/Release/ && cp ./node_modules/antd/dist/antd.min.css build/Release/"
+        "build": "rm -rf ./build && ./node_modules/.bin/tsc -p . && ./node_modules/.bin/tsc -p ./tsconfig.main.json && cp ./src/index.html compiled/ && cp ./node_modules/antd/dist/antd.min.css compiled/",
+        "pack": "npm run build && electron-builder --dir",
+        "dist": "npm run build && electron-builder"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
         "antd": "^3.1.6",
-        "electron": "^1.7.12",
         "moment": "^2.20.1",
         "react": "^16.2.0",
         "react-dom": "^16.2.0",
@@ -22,7 +23,16 @@
         "@types/react": "^16.0.36",
         "@types/react-dom": "^16.0.3",
         "@types/recharts": "^1.0.13",
+        "electron": "^1.7.12",
+        "electron-builder": "^19.56.0",
+        "jquery": "^3.3.1",
         "tslint": "^5.9.1",
         "typescript": "^2.7.1"
+    },
+    "build": {
+        "appId": "rt_helper",
+        "mac": {
+            "category": "Util"
+        }
     }
 }

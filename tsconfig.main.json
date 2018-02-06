@@ -3,14 +3,14 @@
         "./src/main.ts"
     ],
     "compilerOptions": {
-        "target": "es6",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
-        "module": "commonjs",                     /* Specify module code generation: 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
-        "jsx": "react",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
-        "outDir": "./build/Release",              /* Redirect output structure to the directory. */
-        "removeComments": true,                /* Do not emit comments to output. */
-        "strict": true,                            /* Enable all strict type-checking options. */
-        "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
-        "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
+        "target": "es6",                          
+        "module": "commonjs",                     
+        "jsx": "react",                     
+        "outDir": "./compiled",              
+        "removeComments": true,                
+        "strict": true,                        
+        "experimentalDecorators": true,        
+        "emitDecoratorMetadata": true,         
         "listFiles": true,
         "allowSyntheticDefaultImports": true
     }
