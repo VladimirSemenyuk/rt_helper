@@ -1,4 +1,6 @@
 {
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "tslint.configFile": "tslint.json",
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -6,6 +8,6 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/node_modules": true,
-        "**/build": true
+        "build": true,
     }
 }
