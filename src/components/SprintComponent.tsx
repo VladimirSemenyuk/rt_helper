@@ -8,7 +8,7 @@ import TicketIdComponent from './TicketIdComponent';
 import statusComponent from './statusComponent';
 import loeComponent from './loeComponent';
 import troubleIconComponent from './troubleIconComponent';
-import timeComponent from './timeComponent';
+import TimeComponent from './TimeComponent';
 import Sprint from '../models/Sprint';
 import loaderComponent from './loaderComponent';
 import GlobalState from '../GlobalState';
@@ -55,7 +55,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
         });
 
         if (this.state.loading && this.state.loadingStatus) {
-            content = loaderComponent(this.state.loadingStatus)
+            content = loaderComponent(this.state.loadingStatus);
         } else if (tickets.length) {
             const sprint = new Sprint(this.state.currentSprintId, tickets);
             const ticketsByStatuses: {[key: string]: Ticket[]} = {};
@@ -103,23 +103,21 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                     title: 'id',
                 },
                 {
-                    dataIndex: TAGS_FIELD_NAME,
+                    dataIndex: 'tags',
                     title: 'tags',
                 },
                 {
                     ...getColumnConfig('title'),
-                    title: 'Subject'
+                    title: 'Subject',
                 },
                 {
                     ...getColumnConfig('Owner', [...new Set(tickets.map(t => t.Owner))]),
                 },
                 {
                     ...getColumnConfig('estimatedMinutes'),
-                    render: (left: string, ticket: Ticket) => {
-                        return timeComponent(ticket, (t: Ticket) => <span>
-                            {loeComponent(t.workedMinutes)} / {loeComponent(t.estimatedMinutes)}
-                        </span>);
-                    },
+                    render: (left: any, ticket: Ticket) => <TimeComponent ticket={ticket}>
+                            {loeComponent(ticket.workedMinutes)} / {loeComponent(ticket.estimatedMinutes)}
+                        </TimeComponent>,
                     title: 'loe',
                 },
                 ...[...report.dates].map(m => {
@@ -186,14 +184,13 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                 <Row>
                     <Col span={12}>
                         <Card title='Sprint Overview'>
-                            <div>
+                            <p>
                             <b>Tickets total:</b> {sprint.tickets.length}&nbsp;&nbsp;&nbsp;
                                 {
                                     sprint.tickets.map(t => <span key={'sprint-ticket-all-' + t.id}>
-                                        <TicketIdComponent ticket={t} />, 
-                                    </span>)
+                                        <TicketIdComponent ticket={t} />, </span>)
                                 }
-                            </div>
+                            </p>
                             <div>
                                 <b>Tickets by statuses:</b>
                                 {
@@ -203,11 +200,10 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                                                 {statusComponent(status)} {ticketsByStatuses[status].length}&nbsp;&nbsp;&nbsp;
                                                 {
                                                     ticketsByStatuses[status].map(t => <span key={'sprint-ticket-by-status-' + t.id}>
-                                                        <TicketIdComponent ticket={t} />
-                                                    </span>)
+                                                        <TicketIdComponent ticket={t} />, </span>)
                                                 }
                                             </div>
-                                        )
+                                        );
                                     })
                                 }
                             </div>
@@ -228,7 +224,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                                                 ticketsByTroubles[trouble].map(t => <span key={'sprint-ticket-by-trouble-' + t.id}><TicketIdComponent ticket={t} />, </span>)
                                             }
                                         </div>
-                                    )
+                                    );
                                 })
                             }
 
@@ -264,9 +260,8 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                     </Col>
 
                 </Row>
-  
                 <Table columns={columns} dataSource={data} pagination={false}/>
-            </div>
+            </div>;
         }
 
         return (
@@ -275,9 +270,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                     <Col span={3}>
                         <Select style={{ width: 200 }} defaultValue={this.state.currentSprintId} onChange={this.selectSprint}>
                             {
-                                sprints.sort().reverse().map((s) => {
-                                    return <Select.Option value={s} key={'sprint-' + s}>{s}</Select.Option>
-                                })
+                                sprints.sort().reverse().map((s) => <Select.Option value={s} key={'sprint-' + s}>{s}</Select.Option>)
                             }
                         </Select>
                     </Col>
@@ -305,7 +298,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
 
                 {content}
             </div>
-        )
+        );
     }
 
     @bind
@@ -313,18 +306,18 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
         this.setState({
             loading: true,
             loadingStatus: {
-                text: 'Loading'
+                text: 'Loading',
             },
-        }); 
+        });
 
         this.props.dashboard.fetch({
             sprints: [this.state.currentSprintId],
             withHistory: true,
         }).then((tickets) => {
             this.setState({
-                tickets: tickets,
                 loading: false,
-                loadingStatus: this.props.dashboard.loadingStatus
+                loadingStatus: this.props.dashboard.loadingStatus,
+                tickets,
             });
 
             previouslyLoadedTickets = tickets;
@@ -336,27 +329,27 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
     }
 
     @bind
-    onChangeLoadingStatus(status: TSTATUS) {
+    private onChangeLoadingStatus(status: TSTATUS) {
         this.setState({
-            loadingStatus: status
+            loadingStatus: status,
         });
     }
 
     @bind
-    selectSprint(id: SelectValue) {
+    private selectSprint(id: SelectValue) {
         this.setState({
-            currentSprintId: id
+            currentSprintId: id,
         }, this.load);
     }
 
     @bind
-    changeQueues(values: SelectValue) {
+    private changeQueues(values: SelectValue) {
         globalState.queues = values as string[];
 
         globalState.sync();
 
         this.setState({
-            queues: globalState.queues
-        })
-    };
+            queues: globalState.queues,
+        });
+    }
 }

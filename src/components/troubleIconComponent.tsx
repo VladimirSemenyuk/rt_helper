@@ -7,10 +7,24 @@ export default function troubleIconComponent(trouble: string) {
     const key = Math.random();
 
     switch (trouble) {
+        case TROUBLES.POOR_RESEARCH:
+        return (
+            <Tooltip key={key} title='Poor research'>
+                <Icon type='warning' style={{color: COLORS.purple}} />&nbsp;
+            </Tooltip>
+        );
+
         case TROUBLES.NO_ESTIMATION:
         return (
             <Tooltip key={key} title='No estimation'>
                 <Icon type='close-circle' style={{color: COLORS.blue}} />&nbsp;
+            </Tooltip>
+        );
+
+        case TROUBLES.LONG_REVIEW:
+        return (
+            <Tooltip key={key} title='Long review'>
+                <Icon type='question-circle-o' style={{color: COLORS.lightBlue}} />&nbsp;
             </Tooltip>
         );
 
@@ -38,7 +52,7 @@ export default function troubleIconComponent(trouble: string) {
         case TROUBLES.UNASSIGNED:
         return (
             <Tooltip key={key} title='Unassigned'>
-                <Icon type='question-circle-o' style={{color: COLORS.teal}} />&nbsp;
+                <Icon type='frown' style={{color: COLORS.teal}} />&nbsp;
             </Tooltip>
         );
 

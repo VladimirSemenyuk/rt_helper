@@ -49,7 +49,7 @@ export default class TicketComponent extends React.Component<{ticket: Ticket}> {
         const timeEstimated = parseInt(ticket.TimeEstimated, 10);
 
         return (
-            <Card loading={this.state.loading} bordered={false} >
+            <Card loading={this.state.loading} bordered={false} style={{padding: 0}} >
                 <a href={rtLink} target='_blank' onClick={this.openLink} >{rtLink}</a>
                 <Divider />
                 <table style={{width: '100%'}}>

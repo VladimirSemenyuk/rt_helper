@@ -2,11 +2,11 @@
 import * as React from 'react';
 import * as moment from 'moment';
 import { Table, Tag, Tooltip, Progress, Select, Button, Row, Col, Checkbox, DatePicker, Spin } from 'antd';
-import { COLORS, SPRINT_FIELD_NAME, TAGS_FIELD_NAME, BIZ_VALUE_FIELD_NAME, TSTATUS, getColumnConfig } from '../common';
+import { COLORS, SPRINT_FIELD_NAME, TAGS_FIELD_NAME, BIZ_VALUE_FIELD_NAME, TSTATUS, getColumnConfig, TCreds } from '../common';
 import Dashboard from '../models/Dashboard';
 import Ticket, {TROUBLES} from '../models/Ticket';
 import TicketIdComponent from './TicketIdComponent';
-import timeComponent from './timeComponent';
+import TimeComponent from './TimeComponent';
 import statusComponent from './statusComponent';
 import loeComponent from './loeComponent';
 import troublesComponent from './troublesComponent';
@@ -14,7 +14,6 @@ import lifetimeComponent from './lifetimeComponent';
 import loaderComponent from './loaderComponent';
 import GlobalState from '../GlobalState';
 import { bind } from '../decorators';
-import { TCreds } from '../common';
 import { SelectValue } from 'antd/lib/select';
 
 const troublesFilters = Object.keys(TROUBLES).map((t) => {
@@ -72,7 +71,6 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                 {
                     ...getColumnConfig('title'),
                     title: 'Subject',
-                    //render: (title: string, ticket: Ticket) => <span title={ticket.Subject}>{title}</span>,
                 },
                 {
                     ...getColumnConfig('Status', statuses),
@@ -117,11 +115,9 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                 },
                 {
                     ...getColumnConfig('estimatedMinutes'),
-                    render: (left, ticket: Ticket) => {
-                        return timeComponent(ticket, (t: Ticket) => <span>
-                            {loeComponent(t.workedMinutes)} / {loeComponent(t.estimatedMinutes)}
-                        </span>);
-                    },
+                    render: (left, ticket: Ticket) => <TimeComponent ticket={ticket}>
+                            {loeComponent(ticket.workedMinutes)} / {loeComponent(ticket.estimatedMinutes)}
+                        </TimeComponent>,
                     title: 'loe',
                 },
                 // {
@@ -202,7 +198,7 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
         this.setState({
             loading: true,
             loadingStatus: {
-                text: 'Loading'
+                text: 'Loading',
             },
         }, () => {
             this.props.dashboard.fetch({
@@ -216,12 +212,11 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                     loadingStatus: this.props.dashboard.loadingStatus,
                     tickets,
                 });
-    
+
                 previouslyLoadedTickets = tickets;
-    
                 this.props.dashboard.offChangeLoadingStatus(this.onChangeLoadingStatus);
             });
-    
+
             this.props.dashboard.onChangeLoadingStatus(this.onChangeLoadingStatus);
         });
     }

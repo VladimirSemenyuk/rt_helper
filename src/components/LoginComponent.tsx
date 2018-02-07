@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Form, Icon, Input, Button, Checkbox, Modal, Alert } from 'antd'
+import { Form, Icon, Input, Button, Checkbox, Modal, Alert } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { bind } from '../decorators';
 import { TCreds } from '../common';
@@ -8,7 +8,6 @@ import credentials from '../credentials';
 
 interface IFormProps extends FormComponentProps {
     onLogin: (creds: TCreds) => void;
-    //loginFn: (value: TCreds) => Promise<TCreds>
 }
 
 class LoginForm extends React.Component<IFormProps> {
@@ -22,40 +21,45 @@ class LoginForm extends React.Component<IFormProps> {
         return (
             <Modal
                 visible={true}
-                title="Login Form"
-                // okText="Login"
+                title='Login Form'
+                // okText='Login'
                 closable={false}
                 destroyOnClose={true}
                 footer={<Button onClick={this.handleSubmit} type='primary'loading={this.state.loading}  >Login</Button>}
                 // onCancel={onCancel}
                 // onOk={onCreate}
             >
-                <Form className="login-form">
+                <Form className='login-form'>
                     <Form.Item>
                         {getFieldDecorator('login', {
-                            rules: [{ required: true, message: 'Please input your username!' }],
+                            rules: [{ required: true, message: 'Please input your Username!' }],
                         })(
-                            <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" />
+                            <Input
+                                prefix={<Icon type='user' style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                placeholder='Username'
+                                onPressEnter={this.handleSubmit}
+                                autoFocus={true} />,
                             )}
                     </Form.Item>
                     <Form.Item>
                         {getFieldDecorator('password', {
                             rules: [{ required: true, message: 'Please input your Password!' }],
                         })(
-                            <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+                            <Input
+                                prefix={<Icon type='lock' style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                type='password'
+                                placeholder='Password'
+                                onPressEnter={this.handleSubmit} />,
                             )}
                     </Form.Item>
                 </Form>
-
                 {
                     this.state.error &&
                     <Alert
                         message={this.state.error}
-                        //description="Error Description Error Description Error Description Error Description Error Description Error Description"
-                        type="error"
+                        type='error'
                     />
                 }
-                
             </Modal>
         );
     }
@@ -63,11 +67,11 @@ class LoginForm extends React.Component<IFormProps> {
     @bind
     public async handleSubmit(e: React.FormEvent<any>) {
         e.preventDefault();
-        
+
         this.props.form.validateFields(async (err, values) => {
             if (!err) {
                 Object.assign(credentials, values);
-                
+
                 try {
                     this.setState({
                         loading: true,
@@ -78,7 +82,7 @@ class LoginForm extends React.Component<IFormProps> {
                     this.setState({
                         loading: false,
                     });
-                    
+
                     this.props.onLogin(values);
                 } catch (e) {
                     this.setState({
