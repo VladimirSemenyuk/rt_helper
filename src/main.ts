@@ -13,12 +13,12 @@ function createWindow() {
         minHeight: 920,
         minWidth: 1600,
         resizable: true,
-        width: 1600,
         title: 'rt_helper',
         webPreferences: {
             devTools: true,
-            zoomFactor: 0.8
-        }
+            zoomFactor: 0.8,
+        },
+        width: 1600,
     });
 
     mainWindow.loadURL('file://' + __dirname + '/index.html');

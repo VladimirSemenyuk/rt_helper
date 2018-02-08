@@ -34,15 +34,14 @@ export default class Dashboard {
             text: 'Fetching Tickets Lists...',
         });
 
-        const ticketsToFetch= await this.getAllTicketToFetch([...new Set([
+        const ticketsToFetch = await this.getAllTicketToFetch([...new Set([
             ...await this.fetchTicketsListWithQuery('Owner', owners, allStatuses, from),
             ...await this.fetchTicketsListWithQuery('Queue', queues, allStatuses, from),
-            ...await this.fetchTicketsListWithQuery(SPRINT_FIELD_NAME, sprints, allStatuses, from)
+            ...await this.fetchTicketsListWithQuery(SPRINT_FIELD_NAME, sprints, allStatuses, from),
         ])]);
 
         const ticketsTofetchIds = ticketsToFetch.ids;
         const map = ticketsToFetch.map;
-
 
         ticketsTofetchIds.forEach((id) => {
             this.tickets[id] = this.tickets[id] || new Ticket(id);
@@ -69,7 +68,7 @@ export default class Dashboard {
         while (count !== idsSet.size) {
             count = idsSet.size;
 
-            let promises = [];
+            const promises = [];
 
             for (const id of [...idsSet]) {
                 const p = fetch(`search/ticket?query=MemberOf=${id}`).then((resp) => {
@@ -83,14 +82,14 @@ export default class Dashboard {
                 promises.push(p);
             }
 
-            (await Promise.all(promises)).forEach((ids) => {
-                ids.forEach(id => idsSet.add(id));
+            (await Promise.all(promises)).forEach((is: string[]) => {
+                is.forEach(id => idsSet.add(id));
             });
         }
 
         return {
             ids: [...idsSet],
-            map
+            map,
         };
     }
 

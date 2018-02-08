@@ -6,6 +6,7 @@ import Ticket from '../models/Ticket';
 import Dashboard from '../models/Dashboard';
 import TicketIdComponent from './TicketIdComponent';
 import statusComponent from './statusComponent';
+import chatWithSlackComponent from './chatWithSlackComponent';
 import loeComponent from './loeComponent';
 import troubleIconComponent from './troubleIconComponent';
 import TimeComponent from './TimeComponent';
@@ -16,7 +17,7 @@ import { COLORS, TSTATUS, getColumnConfig, TAGS_FIELD_NAME, TCreds } from '../co
 import { bind } from '../decorators';
 import { SelectValue } from 'antd/lib/select';
 
-const globalState = new GlobalState('SprintComponent');
+const globalState = new GlobalState<{queues: string[]}>('SprintComponent');
 const DONE_STATUSES = ['merged', 'deployed', 'staging', 'resolved', 'rejected', 'accepted'];
 
 function getSprintId(mdt: moment.Moment) {
@@ -40,7 +41,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
         currentSprintId: getSprintId(moment()),
         loading: false,
         loadingStatus: {} as TSTATUS,
-        queues: globalState.queues,
+        queues: globalState.get('queues'),
         tickets: previouslyLoadedTickets,
     };
 
@@ -112,6 +113,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                 },
                 {
                     ...getColumnConfig('Owner', [...new Set(tickets.map(t => t.Owner))]),
+                    // render: chatWithSlackComponent,
                 },
                 {
                     ...getColumnConfig('estimatedMinutes'),
@@ -344,12 +346,10 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
 
     @bind
     private changeQueues(values: SelectValue) {
-        globalState.queues = values as string[];
-
-        globalState.sync();
+        globalState.set('queues', values as string[]);
 
         this.setState({
-            queues: globalState.queues,
+            queues: globalState.get('queues'),
         });
     }
 }

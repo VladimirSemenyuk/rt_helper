@@ -2,7 +2,7 @@
 import * as React from 'react';
 import * as moment from 'moment';
 import { Table, Tag, Tooltip, Progress, Select, Button, Row, Col, Checkbox, DatePicker, Spin } from 'antd';
-import { COLORS, SPRINT_FIELD_NAME, TAGS_FIELD_NAME, BIZ_VALUE_FIELD_NAME, TSTATUS, getColumnConfig, TCreds } from '../common';
+import { COLORS, SPRINT_FIELD_NAME, TAGS_FIELD_NAME, BIZ_VALUE_FIELD_NAME, TSTATUS, getColumnConfig, TCreds, knownQueuesWith } from '../common';
 import Dashboard from '../models/Dashboard';
 import Ticket, {TROUBLES} from '../models/Ticket';
 import TicketIdComponent from './TicketIdComponent';
@@ -25,16 +25,21 @@ const troublesFilters = Object.keys(TROUBLES).map((t) => {
 
 let previouslyLoadedTickets: Ticket[] = [];
 
-const globaleState = new GlobalState('TicketsTableComponent');
+const globaleState = new GlobalState<{
+    allStatuses: boolean;
+    fromDate: string;
+    owners: string[];
+    queues: string[];
+}>('TicketsTableComponent');
 
 export default class TicketsTableComponent extends React.Component<{dashboard: Dashboard}> {
     public state = {
-        allStatuses: globaleState.allStatuses,
-        fromDate: globaleState.fromDate,
+        allStatuses: globaleState.get('allStatuses'),
+        fromDate: globaleState.get('fromDate'),
         loading: false,
         loadingStatus: {},
-        owners: globaleState.owners,
-        queues: globaleState.queues,
+        owners: globaleState.get('owners'),
+        queues: globaleState.get('queues'),
         tickets: previouslyLoadedTickets,
     };
 
@@ -44,7 +49,25 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
         if (this.state.loading) {
             content = loaderComponent(this.state.loadingStatus || {});
         } else {
-            const tickets = this.state.tickets;
+            const map: {[key: string]: number} = {};
+            const allTickets = [...this.state.tickets];
+            const ticketIdsToShow = [];
+
+            let ticket = allTickets.shift();
+
+            while (ticket) {
+                for (const c of ticket.children || []) {
+                    allTickets.push(c);
+                }
+
+                map[ticket.id] = map[ticket.id] || 0;
+
+                map[ticket.id]++;
+
+                ticket = allTickets.shift();
+            }
+
+            const tickets = this.state.tickets.filter((t) => map[t.id] === 1);
             const statuses = [...new Set(tickets.map(t => t.Status))];
             const owners = [...new Set(tickets.map(t => t.Owner))];
             const queues = [...new Set(tickets.map(t => t.Queue))];
@@ -65,24 +88,25 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                     title: 'id',
                 },
                 {
-                    dataIndex: TAGS_FIELD_NAME,
-                    title: 'tags',
-                },
-                {
                     ...getColumnConfig('title'),
                     title: 'Subject',
                 },
                 {
+                    ...getColumnConfig('Queue', queues),
+                    render: (q: string) => {
+                        let tmp = knownQueuesWith.find((item) => item.name === q);
+
+                        tmp = tmp || {
+                            color: COLORS.blue,
+                            name: 'undef',
+                        };
+
+                        return <Tag color={tmp.color}>{q}</Tag>;
+                    },
+                },
+                {
                     ...getColumnConfig('Status', statuses),
                     render: statusComponent,
-                },
-                {
-                    ...getColumnConfig('Queue', queues),
-                    render: q => <Tag>{q}</Tag>,
-                },
-                {
-                    ...getColumnConfig('Owner', owners),
-                    render: o => <b>{o}</b>,
                 },
                 {
                     ...getColumnConfig('Priority'),
@@ -104,14 +128,8 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                     title: 'Biz. Value',
                 },
                 {
-                    ...getColumnConfig('sprint', sprints),
-                    dataIndex: 'sprint',
-                    title: 'Sprint',
-                },
-                {
-                    dataIndex: 'lifeTime',
-                    render: lifetimeComponent,
-                    title: 'Life Time',
+                    ...getColumnConfig('Owner', owners),
+                    render: o => <b>{o}</b>,
                 },
                 {
                     ...getColumnConfig('estimatedMinutes'),
@@ -119,6 +137,20 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                             {loeComponent(ticket.workedMinutes)} / {loeComponent(ticket.estimatedMinutes)}
                         </TimeComponent>,
                     title: 'loe',
+                },
+                {
+                    ...getColumnConfig('sprint', sprints),
+                    dataIndex: 'sprint',
+                    title: 'Sprint',
+                },
+                {
+                    dataIndex: TAGS_FIELD_NAME,
+                    title: 'tags',
+                },
+                {
+                    dataIndex: 'lifeTime',
+                    render: lifetimeComponent,
+                    title: 'Life Time',
                 },
                 // {
                 //     ...getColumnConfig('leftMinutes'),
@@ -148,8 +180,12 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                             defaultValue={this.state.queues}
                             style={{minWidth: '300px'}}
                         >
-                            { [...new Set(this.state.queues.concat(globaleState.queues))].map(q =>
-                                <Select.Option key={q}>{q}</Select.Option>) }
+                            {/* { [...new Set(this.state.queues.concat(globaleState.get('queues')))].map(q =>
+                                <Select.Option key={q}>{q}</Select.Option>) } */}
+
+                            {
+                                knownQueuesWith.map((item) => <Select.Option key={item.name}>{item.name}</Select.Option>)
+                            }
                         </Select>
                     </Col>
                     <Col span={11}>
@@ -160,7 +196,7 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                             defaultValue={this.state.owners}
                             style={{minWidth: '300px'}}
                         >
-                            { [...new Set(this.state.owners.concat(globaleState.owners))].map(owner =>
+                            { [...new Set(this.state.owners.concat(globaleState.get('owners')))].map(owner =>
                                 <Select.Option key={owner}>{owner}</Select.Option>) }
                         </Select>
                     </Col>
@@ -223,49 +259,41 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
 
     @bind
     private changeOwners(values: SelectValue) {
-        globaleState.owners = values as string[];
-
-        globaleState.sync();
+        globaleState.set('owners', values as string[]);
 
         this.setState({
             ...this.state,
-            owners: globaleState.owners,
+            owners: globaleState.get('owners'),
         });
     }
 
     @bind
     private changeQueues(values: SelectValue) {
-        globaleState.queues = values as string[];
-
-        globaleState.sync();
+        globaleState.set('queues', values as string[]);
 
         this.setState({
             ...this.state,
-            queues: globaleState.queues,
+            queues: globaleState.get('queues'),
         });
     }
 
     @bind
     private changeAllStatuses(e: React.ChangeEvent<HTMLInputElement>) {
-        globaleState.allStatuses = e.target.checked;
-
-        globaleState.sync();
+        globaleState.set('allStatuses', e.target.checked);
 
         this.setState({
             ...this.state,
-            allStatuses: globaleState.allStatuses,
+            allStatuses: globaleState.get('allStatuses'),
         });
     }
 
     @bind
     private changeFromDate(date: moment.Moment, dateStr: string) {
-        globaleState.fromDate = dateStr;
-
-        globaleState.sync();
+        globaleState.set('fromDate', dateStr);
 
         this.setState({
             ...this.state,
-            fromDate: globaleState.fromDate,
+            fromDate: globaleState.get('fromDate'),
         });
     }
 

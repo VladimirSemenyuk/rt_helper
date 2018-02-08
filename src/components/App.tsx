@@ -83,10 +83,10 @@ class App extends React.Component {
     }
 
     @bind
-    private onLogin(creds: TCreds) {        
+    private onLogin(creds: TCreds) {
         this.setState({
-            isLoggedIn: true
-        })
+            isLoggedIn: true,
+        });
     }
 }
 

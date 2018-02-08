@@ -24,13 +24,22 @@ export function parseApiResponce<T extends object>(text: string, rowsToSlice = 2
     return result;
 }
 
-export async function fetchData(url: string, init: any = {headers: Object}) {
+export async function fetchData(url: string, init: any = {headers: Object, credentials: 'include'}) {
     init.headers = {
         ...init.headers || {},
         Authorization: 'Basic ' + Buffer.from(`${credentials.login}:${credentials.password}`).toString('base64'),
     };
 
     const res = await fetch(`https://www.iponweb.net/rt/REST/1.0/${url}`, init);
+
+    // if (res.status === 401) {
+    //     init.headers = {
+    //         ...init.headers,
+    //         Authorization: 'Basic ' + Buffer.from(`${credentials.login}:${credentials.password}`).toString('base64'),
+    //     };
+
+    //     res = await fetch(`https://www.iponweb.net/rt/REST/1.0/${url}`, init);
+    // }
 
     if (res.status >= 400) {
         throw new Error(res.statusText);

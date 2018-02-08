@@ -164,7 +164,7 @@ export default class TicketComponent extends React.Component<{ticket: Ticket}> {
                         title = 'Time Worked';
                         color = COLORS.red;
                         body = <div>
-                                Icon type='clock-circle' /> {entry.MinutesWorked} minutes ({entry.NewValue} total)
+                                 {entry.MinutesWorked} minutes ({entry.NewValue} total)
                             </div>;
                         break;
                     default:
@@ -181,7 +181,7 @@ export default class TicketComponent extends React.Component<{ticket: Ticket}> {
         }
 
         return (
-            <Timeline.Item key={`e-${entry.id}`} color={color}>
+            <Timeline.Item key={`e-${entry.id}`} color={color} dot={(entry.Field === 'TimeWorked') ? <Icon type='clock-circle-o' style={{color}} /> : undefined}>
                 <div><Tag>{title}</Tag> by <b>{entry.Creator}</b></div>
                 <div><i>{entry.Created}</i></div>
                 {body}

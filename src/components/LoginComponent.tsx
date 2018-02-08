@@ -16,8 +16,13 @@ class LoginForm extends React.Component<IFormProps> {
         loading: false,
     };
 
+    public componentDidMount() {
+        this.load().catch();
+    }
+
     public render() {
         const { getFieldDecorator } = this.props.form;
+        // console.log(credentials.login);
         return (
             <Modal
                 visible={true}
@@ -32,6 +37,7 @@ class LoginForm extends React.Component<IFormProps> {
                 <Form className='login-form'>
                     <Form.Item>
                         {getFieldDecorator('login', {
+                            initialValue: credentials.login,
                             rules: [{ required: true, message: 'Please input your Username!' }],
                         })(
                             <Input
@@ -43,6 +49,7 @@ class LoginForm extends React.Component<IFormProps> {
                     </Form.Item>
                     <Form.Item>
                         {getFieldDecorator('password', {
+                            initialValue: credentials.password,
                             rules: [{ required: true, message: 'Please input your Password!' }],
                         })(
                             <Input
@@ -68,29 +75,41 @@ class LoginForm extends React.Component<IFormProps> {
     public async handleSubmit(e: React.FormEvent<any>) {
         e.preventDefault();
 
-        this.props.form.validateFields(async (err, values) => {
-            if (!err) {
-                Object.assign(credentials, values);
+        await this.load();
+    }
 
-                try {
-                    this.setState({
-                        loading: true,
-                    });
+    private async load() {
+        return new Promise((res, rej) => {
+            this.props.form.validateFields(async (err, values) => {
+                if (!err) {
+                    Object.assign(credentials, values);
 
-                    await fetchData(`user/${values.login}`);
+                    try {
+                        this.setState({
+                            loading: true,
+                        });
 
-                    this.setState({
-                        loading: false,
-                    });
+                        await fetchData(`user/${values.login}`);
 
-                    this.props.onLogin(values);
-                } catch (e) {
-                    this.setState({
-                        error: 'Login Failed',
-                        loading: false,
-                    });
+                        this.setState({
+                            loading: false,
+                        }, () => {
+                            this.props.onLogin(values);
+
+                            res();
+                        });
+
+                    } catch (e) {
+                        this.setState({
+                            error: 'Login Failed',
+                            loading: false,
+                        }, () => {
+
+                            rej();
+                        });
+                    }
                 }
-            }
+            });
         });
     }
 }

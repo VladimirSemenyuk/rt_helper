@@ -57,3 +57,26 @@ export function getColumnConfig<T>(fieldName: keyof T, filters?: string[]) {
 
     return res;
 }
+
+export const knownQueuesWith = [
+    {name: 'bsw-msoa-dev', color: COLORS.purple},
+    {name: 'bsw-reporting-dev', color: COLORS.blue},
+    {name: 'bsw-bm-dev', color: COLORS.green},
+    {name: 'bsw-lua-dev', color: COLORS.grey},
+    {name: 'bsw-frontend-dev', color: COLORS.lightBlue},
+    {name: 'bsw-imp_anomaly-dev', color: COLORS.black},
+    {name: 'bsw-ui-qa', color: COLORS.red},
+    {name: 'bsw-rnd', color: COLORS.silver},
+    {name: 'bidswitch-support', color: COLORS.teal},
+    {name: 'bsw-clients-issues', color: COLORS.black},
+    {name: 'bsw-sysops', color: COLORS.blue},
+    {name: 'bidswitch-feedback', color: COLORS.green},
+    {name: 'bsw-alerts', color: COLORS.grey},
+    {name: 'bsw-biz', color: COLORS.lightBlue},
+    {name: 'bsw-cm', color: COLORS.purple},
+    {name: 'bsw-devops', color: COLORS.red},
+    {name: 'bsw-discrepancy', color: COLORS.silver},
+    {name: 'bsw-docs', color: COLORS.teal},
+    {name: 'bsw-incidents', color: COLORS.black},
+    {name: 'bsw-jp', color: COLORS.blue},
+];
