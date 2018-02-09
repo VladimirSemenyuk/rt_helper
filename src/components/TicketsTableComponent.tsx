@@ -80,10 +80,10 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                 };
             });
 
-            content = <Table pagination={false} size='small' columns={[
+            content = <Table onChange={this.onTableChange} pagination={false} size='small' columns={[
                 {
                     dataIndex: 'id',
-                    render: (id: string, ticket: Ticket) => <TicketIdComponent ticket={ticket} />,
+                    render: (id: string, t: Ticket) => <TicketIdComponent ticket={t} />,
                     sorter: (a: Ticket, b: Ticket) => parseInt(a.id, 10) - parseInt(b.id, 10),
                     title: 'id',
                 },
@@ -124,7 +124,7 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                             value: false,
                         },
                     ],
-                    onFilter: (value, ticket: Ticket) => (Boolean(ticket.hasBizValue)).toString() === value,
+                    onFilter: (value, t: Ticket) => (Boolean(t.hasBizValue)).toString() === value,
                     title: 'Biz. Value',
                 },
                 {
@@ -133,8 +133,8 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                 },
                 {
                     ...getColumnConfig('estimatedMinutes'),
-                    render: (left, ticket: Ticket) => <TimeComponent ticket={ticket}>
-                            {loeComponent(ticket.workedMinutes)} / {loeComponent(ticket.estimatedMinutes)}
+                    render: (left, t: Ticket) => <TimeComponent ticket={t}>
+                            {loeComponent(t.workedMinutes)} / {loeComponent(t.estimatedMinutes)}
                         </TimeComponent>,
                     title: 'loe',
                 },
@@ -303,6 +303,25 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
             ...this.state,
             loadingStatus: status,
         });
+    }
+
+    @bind
+    private onTableChange(pagination: any, filters: any, sorter: any) {
+        const filtered = this.state.tickets.filter((t: any) => {
+            let res = true;
+
+            for (const f of Object.keys(filters)) {
+                if (filters[f].indexOf(t[f]) === -1) {
+                    res = false;
+                }
+            }
+
+            return res;
+        });
+
+        // console.log(filtered.map(t => {
+        //     return `${t.Queue} — ${t.id} — ${t.Subject}: ${t.statusesTimes.merged}`;
+        // }).join(',\n'));
     }
 }
 

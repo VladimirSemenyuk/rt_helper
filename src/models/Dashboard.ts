@@ -21,7 +21,7 @@ export default class Dashboard {
         });
 
         const {queues, owners, sprints, from, allStatuses, withHistory} = {
-            allStatuses: false,
+            allStatuses: true,
             // from: null,
             owners: [] as string[],
             queues: [] as string[],

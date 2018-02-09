@@ -52,6 +52,14 @@ export function getColumnConfig<T>(fieldName: keyof T, filters?: string[]) {
                 text: q,
                 value: q,
             };
+        }).sort((a, b) => {
+            if (a < b) {
+                return -1;
+            }
+            if (a > b) {
+                return 1;
+            }
+            return 0;
         });
     }
 
