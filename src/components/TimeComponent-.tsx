@@ -2,7 +2,7 @@ import * as React from 'react';
 import { COLORS } from '../common';
 import Ticket from '../models/Ticket';
 
-export default class TimeRenderComponent extends React.Component<{ticket: Ticket}> {
+export default class TimeComponent extends React.Component<{ticket: Ticket}> {
     public render() {
         let color = COLORS.blue;
         const d = this.props.ticket.workedMinutes / this.props.ticket.estimatedMinutes;

@@ -284,7 +284,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
                             defaultValue={this.state.queues}
                             style={{minWidth: '300px'}}
                         >
-                            { [...new Set(this.state.queues.concat(tickets.map(t => t.Queue)))].map(q => <Select.Option key={q}>{q}</Select.Option>) }
+                            { [...new Set(this.state.queues.concat(this.state.tickets.map(t => t.Queue)))].map(q => <Select.Option key={q}>{q}</Select.Option>) }
                         </Select>
                     </Col>
                     <Col span={2} style={{textAlign: 'right'}}>

@@ -13,7 +13,7 @@ import {
     Menu,
     Row,
     Modal,
-    Button
+    Button,
 } from 'antd';
 import Dashboard from '../models/Dashboard';
 import LoginComponent from './LoginComponent';
@@ -23,8 +23,8 @@ const { Header, Content, Footer, Sider } = Layout;
 
 class App extends React.Component {
     public state = {
-        section: 'table',
         isLoggedIn: false,
+        section: 'table',
     };
 
     private dashboard = new Dashboard();
@@ -34,9 +34,7 @@ class App extends React.Component {
 
         if (!this.state.isLoggedIn) {
             return <LoginComponent onLogin={this.onLogin} />;
-
-        } else 
-        if (this.state.section === 'table') {
+        } else if (this.state.section === 'table') {
             content = <TicketsTableComponent dashboard={this.dashboard} />;
         } else if (this.state.section === 'sprint') {
             content = <SprintComponent dashboard={this.dashboard} />;

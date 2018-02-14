@@ -6,15 +6,17 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "npm run build && ./node_modules/.bin/electron .",
-        "build": "rm -rf ./build && ./node_modules/.bin/tsc -p . && ./node_modules/.bin/tsc -p ./tsconfig.main.json && cp ./src/index.html compiled/ && cp ./node_modules/antd/dist/antd.min.css compiled/",
+        "build": "rm -rf ./compiled && ./node_modules/.bin/tsc -p . && ./node_modules/.bin/tsc -p ./tsconfig.main.json && cp ./src/index.html compiled/ && cp ./node_modules/antd/dist/antd.min.css compiled/",
         "pack": "npm run build && electron-builder --dir",
-        "dist": "npm run build && electron-builder"
+        "dist": "npm run build && ls -la && electron-builder"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@types/electron-debug": "^1.1.0",
         "antd": "^3.2.0",
         "crypto-js": "^3.1.9-1",
+        "electron-debug": "^1.5.0",
         "moment": "^2.20.1",
         "react": "^16.2.0",
         "react-dom": "^16.2.0",

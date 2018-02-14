@@ -26,6 +26,7 @@ function createWindow() {
     mainWindow.on(EVENTS.CLOSED, () => {
         mainWindow = null;
     });
+
 }
 
 app.on(EVENTS.READY, createWindow);

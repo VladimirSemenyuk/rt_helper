@@ -10,7 +10,7 @@ const globaleState = new GlobalState<{
 }>('Credentials');
 
 const SERVICE_NAME = 'rt_helper';
-const KEY = os.hostname() + '_salt_' + os.userInfo().uid;
+const KEY = os.hostname() + '_salt_';
 
 class Credentials {
     private l: string = globaleState.get('login') || '';
