@@ -32,15 +32,6 @@ export async function fetchData(url: string, init: any = {headers: Object, crede
 
     const res = await fetch(`https://www.iponweb.net/rt/REST/1.0/${url}`, init);
 
-    // if (res.status === 401) {
-    //     init.headers = {
-    //         ...init.headers,
-    //         Authorization: 'Basic ' + Buffer.from(`${credentials.login}:${credentials.password}`).toString('base64'),
-    //     };
-
-    //     res = await fetch(`https://www.iponweb.net/rt/REST/1.0/${url}`, init);
-    // }
-
     if (res.status >= 400) {
         throw new Error(res.statusText);
     }
@@ -69,4 +60,4 @@ export function calculateLifeTime(ms: number) {
     s = s - (m * 60);
 
     return { d, h, m, s };
-};
+}

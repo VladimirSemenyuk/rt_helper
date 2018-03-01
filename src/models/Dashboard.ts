@@ -20,9 +20,10 @@ export default class Dashboard {
             text: 'Fetching Queues...',
         });
 
-        const {queues, owners, sprints, from, allStatuses, withHistory} = {
+        const {queues, owners, sprints, from, allStatuses, withHistory, needChildren} = {
             allStatuses: true,
             // from: null,
+            needChildren: true,
             owners: [] as string[],
             queues: [] as string[],
             sprints: [] as string[],
@@ -38,7 +39,7 @@ export default class Dashboard {
             ...await this.fetchTicketsListWithQuery('Owner', owners, allStatuses, from),
             ...await this.fetchTicketsListWithQuery('Queue', queues, allStatuses, from),
             ...await this.fetchTicketsListWithQuery(SPRINT_FIELD_NAME, sprints, allStatuses, from),
-        ])]);
+        ])], needChildren);
 
         const ticketsTofetchIds = ticketsToFetch.ids;
         const map = ticketsToFetch.map;
@@ -60,7 +61,14 @@ export default class Dashboard {
         return ticketsTofetchIds.map(t => this.tickets[t]);
     }
 
-    private async getAllTicketToFetch(ids: string[]) {
+    private async getAllTicketToFetch(ids: string[], needChildren = false) {
+        if (!needChildren) {
+            return {
+                ids,
+                map: {} as {[key: string]: string[]},
+            };
+        }
+
         const idsSet = new Set(ids);
         let count = 0;
         const map: {[key: string]: string[]} = {};
@@ -156,4 +164,5 @@ type TFecthArgs = {
     queues?: string[],
     sprints?: string[],
     withHistory?: boolean,
+    needChildren?: boolean,
 };

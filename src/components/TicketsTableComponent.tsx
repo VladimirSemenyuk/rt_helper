@@ -34,12 +34,12 @@ const globaleState = new GlobalState<{
 
 export default class TicketsTableComponent extends React.Component<{dashboard: Dashboard}> {
     public state = {
-        allStatuses: globaleState.get('allStatuses'),
+        allStatuses: globaleState.get('allStatuses') || false,
         fromDate: globaleState.get('fromDate'),
         loading: false,
         loadingStatus: {},
-        owners: globaleState.get('owners'),
-        queues: globaleState.get('queues'),
+        owners: globaleState.get('owners') || [],
+        queues: globaleState.get('queues') || [],
         tickets: previouslyLoadedTickets,
     };
 
@@ -196,7 +196,7 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
                             defaultValue={this.state.owners}
                             style={{minWidth: '300px'}}
                         >
-                            { [...new Set(this.state.owners.concat(globaleState.get('owners')))].map(owner =>
+                            { [...new Set(this.state.owners.concat(globaleState.get('owners') || []))].map(owner =>
                                 <Select.Option key={owner}>{owner}</Select.Option>) }
                         </Select>
                     </Col>
@@ -240,6 +240,7 @@ export default class TicketsTableComponent extends React.Component<{dashboard: D
             this.props.dashboard.fetch({
                 allStatuses: this.state.allStatuses,
                 from: this.state.fromDate,
+                needChildren: true,
                 owners: this.state.owners,
                 queues: this.state.queues,
             }).then((tickets) => {

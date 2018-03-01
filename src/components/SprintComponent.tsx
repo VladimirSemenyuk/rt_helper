@@ -41,7 +41,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
         currentSprintId: getSprintId(moment()),
         loading: false,
         loadingStatus: {} as TSTATUS,
-        queues: globalState.get('queues'),
+        queues: globalState.get('queues') || [],
         tickets: previouslyLoadedTickets,
     };
 
@@ -313,6 +313,7 @@ export default class SprintComponent extends React.Component<{dashboard: Dashboa
         });
 
         this.props.dashboard.fetch({
+            needChildren: false,
             sprints: [this.state.currentSprintId],
             withHistory: true,
         }).then((tickets) => {
